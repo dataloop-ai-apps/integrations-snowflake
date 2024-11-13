@@ -59,7 +59,7 @@
         },
         "name": "Export Snowflake",
         "categories": ["Snowflake"],
-        "displayName": "Export DatabSnowflakericks",
+        "displayName": "Export Snowflake",
         "description": "Export Dataloop Best Response to Snowflake",
         "scope": "project",
         "configuration": {
