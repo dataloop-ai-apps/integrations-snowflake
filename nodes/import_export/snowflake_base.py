@@ -18,7 +18,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         """
         self.logger = logger
 
-    def create_snowflake_connection(self, account: str, user: str, warehouse: str, database: str, schema: str):
+    def create_snowflake_connection(self, account: str, user: str, warehouse: str, database: str, schema: str, application: str):
         """
         Creates a connection to Snowflake.
 
@@ -38,7 +38,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
             warehouse=warehouse,
             database=database,
             schema=schema,
-            application='Dataloop_ConnectorNode'
+            application=application
         )
         self.logger.info("Successfully created Snowflake connection.")
         return conn
@@ -71,7 +71,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         # Execute query to fetch data
         query = f"SELECT * FROM {table_name}"
         conn = self.create_snowflake_connection(
-            account=account, user=user, warehouse=warehouse, database=database, schema=schema
+            account=account, user=user, warehouse=warehouse, database=database, schema=schema, application='Dataloop_PipelineNodeImport'
         )
         df = pd.read_sql(query, conn)
         conn.close()
@@ -127,7 +127,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
             return None
 
         conn = self.create_snowflake_connection(
-            account=account, user=user, warehouse=warehouse, database=database, schema=schema
+            account=account, user=user, warehouse=warehouse, database=database, schema=schema, application='Dataloop_PipelineNodeExport'
         )
         cursor = conn.cursor()
         update_query = f"""
