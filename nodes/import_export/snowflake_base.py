@@ -18,14 +18,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         """
         self.logger = logger
 
-    def create_snowflake_connection(
-        self,
-        account: str,
-        user: str,
-        warehouse: str,
-        database: str,
-        schema: str,
-    ):
+    def create_snowflake_connection(self, account: str, user: str, warehouse: str, database: str, schema: str, application: str):
         """
         Creates a connection to Snowflake.
 
@@ -45,19 +38,13 @@ class SnowflakeBase(dl.BaseServiceRunner):
             warehouse=warehouse,
             database=database,
             schema=schema,
+            application=application
         )
         self.logger.info("Successfully created Snowflake connection.")
         return conn
 
     def table_to_dataloop(
-        self,
-        account: str,
-        user: str,
-        warehouse: str,
-        database: str,
-        schema: str,
-        table_name: str,
-        dataset_id: str,
+        self, account: str, user: str, warehouse: str, database: str, schema: str, table_name: str, dataset_id: str
     ):
         """
         Fetches data from a Snowflake table and uploads it to a Dataloop dataset.
@@ -72,9 +59,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         :return: The uploaded items or None if an error occurs.
         """
 
-        self.logger.info(
-            "Creating table for dataset '%s' and table '%s'.", dataset_id, table_name
-        )
+        self.logger.info("Creating table for dataset '%s' and table '%s'.", dataset_id, table_name)
 
         try:
             dataset = dl.datasets.get(dataset_id=dataset_id)
@@ -86,11 +71,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         # Execute query to fetch data
         query = f"SELECT * FROM {table_name}"
         conn = self.create_snowflake_connection(
-            account=account,
-            user=user,
-            warehouse=warehouse,
-            database=database,
-            schema=schema,
+            account=account, user=user, warehouse=warehouse, database=database, schema=schema, application='Dataloop_PipelineNodeImport'
         )
         df = pd.read_sql(query, conn)
         conn.close()
@@ -99,29 +80,17 @@ class SnowflakeBase(dl.BaseServiceRunner):
         for i, row in df.iterrows():
             prompt_item = dl.PromptItem(name=str(row.ID))
             prompt_item.add(
-                message={
-                    "role": "user",
-                    "content": [{"mimetype": dl.PromptType.TEXT, "value": row.PROMPT}],
-                }
+                message={"role": "user", "content": [{"mimetype": dl.PromptType.TEXT, "value": row.PROMPT}]}
             )
             prompt_items.append(prompt_item)
 
         # Upload PromptItems to Dataloop
         items = list(dataset.items.upload(local_path=prompt_items, overwrite=True))
-        self.logger.info(
-            "Successfully uploaded %d items to dataset '%s'.", len(items), dataset_id
-        )
+        self.logger.info("Successfully uploaded %d items to dataset '%s'.", len(items), dataset_id)
         return items
 
     def update_table(
-        self,
-        item: dl.Item,
-        account: str,
-        user: str,
-        warehouse: str,
-        database: str,
-        schema: str,
-        table_name: str,
+        self, item: dl.Item, account: str, user: str, warehouse: str, database: str, schema: str, table_name: str
     ):
         """
         Updates a Snowflake table with the best response from a Dataloop item.
@@ -136,9 +105,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         :return: The updated item or None if an error occurs.
         """
 
-        self.logger.info(
-            "Updating table '%s' for item with ID '%s'.", table_name, item.id
-        )
+        self.logger.info("Updating table '%s' for item with ID '%s'.", table_name, item.id)
 
         prompt_item = dl.PromptItem.from_item(item)
         first_prompt_key = prompt_item.prompts[0].key
@@ -160,11 +127,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
             return None
 
         conn = self.create_snowflake_connection(
-            account=account,
-            user=user,
-            warehouse=warehouse,
-            database=database,
-            schema=schema,
+            account=account, user=user, warehouse=warehouse, database=database, schema=schema, application='Dataloop_PipelineNodeExport'
         )
         cursor = conn.cursor()
         update_query = f"""
@@ -173,18 +136,11 @@ class SnowflakeBase(dl.BaseServiceRunner):
                         WHERE ID = %s
                         """
         self.logger.info(
-            "Updating table '%s' for item with ID '%s' with response: %s",
-            table_name,
-            item.id,
-            best_response,
+            "Updating table '%s' for item with ID '%s' with response: %s", table_name, item.id, best_response
         )
         cursor.execute(update_query, (best_response, int(prompt_item.name[:-5])))
         conn.commit()  # Commit the changes
         cursor.close()
         conn.close()
-        self.logger.info(
-            "Successfully updated table '%s' for item with ID '%s'.",
-            table_name,
-            item.id,
-        )
+        self.logger.info("Successfully updated table '%s' for item with ID '%s'.", table_name, item.id)
         return item
