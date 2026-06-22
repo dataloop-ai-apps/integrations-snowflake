@@ -1,7 +1,7 @@
 {
   "displayName": "Snowflake Integration",
   "name": "snowflake-integration",
-  "description": "Snowflake Integration for Dataloop",
+  "description": "Snowflake Integration for DDOE",
   "scope": "project",
   "version": "0.0.7",
   "attributes": {
@@ -28,7 +28,7 @@
         "name": "Import Snowflake",
         "categories": ["Snowflake"],
         "displayName": "Import Snowflake",
-        "description": "Import Snowflake Table into Dataloop",
+        "description": "Import Snowflake Table into DDOE",
         "scope": "project",
         "configuration": {
           "fields": [
@@ -61,7 +61,7 @@
         "name": "Export Snowflake",
         "categories": ["Snowflake"],
         "displayName": "Export Snowflake",
-        "description": "Export Dataloop Best Response to Snowflake",
+        "description": "Export DDOE Best Response to Snowflake",
         "scope": "project",
         "configuration": {
           "fields": [
