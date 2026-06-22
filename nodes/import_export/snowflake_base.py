@@ -47,7 +47,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         self, account: str, user: str, warehouse: str, database: str, schema: str, table_name: str, dataset_id: str
     ):
         """
-        Fetches data from a Snowflake table and uploads it to a Dataloop dataset.
+        Fetches data from a Snowflake table and uploads it to a DDOE dataset.
 
         :param account: The Snowflake account.
         :param user: The Snowflake user.
@@ -55,7 +55,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
         :param database: The Snowflake database.
         :param schema: The Snowflake schema.
         :param table_name: The Snowflake table name.
-        :param dataset_id: The Dataloop dataset ID.
+        :param dataset_id: The DDOE dataset ID.
         :return: The uploaded items or None if an error occurs.
         """
 
@@ -84,7 +84,7 @@ class SnowflakeBase(dl.BaseServiceRunner):
             )
             prompt_items.append(prompt_item)
 
-        # Upload PromptItems to Dataloop
+        # Upload PromptItems to DDOE
         items = list(dataset.items.upload(local_path=prompt_items, overwrite=True))
         self.logger.info("Successfully uploaded %d items to dataset '%s'.", len(items), dataset_id)
         return items
@@ -93,9 +93,9 @@ class SnowflakeBase(dl.BaseServiceRunner):
         self, item: dl.Item, account: str, user: str, warehouse: str, database: str, schema: str, table_name: str
     ):
         """
-        Updates a Snowflake table with the best response from a Dataloop item.
+        Updates a Snowflake table with the best response from a DDOE item.
 
-        :param item: The Dataloop item.
+        :param item: The DDOE item.
         :param account: The Snowflake account.
         :param user: The Snowflake user.
         :param warehouse: The Snowflake warehouse.
